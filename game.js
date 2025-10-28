@@ -20,9 +20,9 @@ let gameState = {
 
 let players = {};
 let playerQueue = []; 
-let io; // Referencia global a la instancia de Socket.IO
+let io;
 
-//* Funciones de Lógica Interna
+//* Lógica Interna del Juego
 
 function resetBall() {
     gameState.ball.x = canvasWidth / 2;
@@ -32,7 +32,7 @@ function resetBall() {
 }
 
 function gameLoop() {
-    if (playerQueue.length < 2) return; // No hacer nada si no hay 2 jugadores
+    if (playerQueue.length < 2) return;
 
     // Mover la pelota
     gameState.ball.x += gameState.ball.dx;
@@ -67,8 +67,7 @@ function gameLoop() {
     io.sockets.emit('gameState', gameState);
 }
 
-
-//* Lógica de Sockets (Manejo de Conexiones y Eventos)
+//* Lógica de Sockets
 
 function handleConnection(socket) {
     console.log('Nuevo jugador conectado:', socket.id);
@@ -77,10 +76,10 @@ function handleConnection(socket) {
     playerQueue.push(socket.id);
     let playerNumber = playerQueue.indexOf(socket.id) + 1;
     players[socket.id] = playerNumber;
-
+    
     socket.emit('playerNumber', playerNumber); 
 
-    // Evento: Desconexión
+    // Desconexión
     socket.on('disconnect', () => {
         console.log('Jugador desconectado:', socket.id);
         const index = playerQueue.indexOf(socket.id);
@@ -90,7 +89,7 @@ function handleConnection(socket) {
         delete players[socket.id];
     });
 
-    // Evento: Movimiento de paleta
+    // Movimiento de paleta
     socket.on('paddleMove', (data) => {
         if (players[socket.id] === 1) {
             gameState.player1.y = data.y;
@@ -100,14 +99,13 @@ function handleConnection(socket) {
     });
 }
 
-
-//* Función de Inicialización del Juego
+//* Inicialización del Juego
 
 export function startGame(socketIoInstance) {
     io = socketIoInstance;
-    
-    // Iniciar el Game Loop a 60 FPS
-    setInterval(gameLoop, 1000 / 60); 
+
+    // Iniciar el Juego a 60 FPS
+    setInterval(gameLoop, 1000 / 60);
 
     // Configurar el listener de conexión de Socket.IO
     io.on('connection', handleConnection);

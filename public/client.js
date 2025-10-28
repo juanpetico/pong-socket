@@ -19,7 +19,7 @@ socket.on('playerNumber', (num) => {
     console.log(`Eres el jugador: ${myPlayerNumber}`);
 });
 
-// Recibir el estado del juego desde el servidor y dibujar
+// Recibir el estado del juego desde el servidor 
 socket.on('gameState', (gameState) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Borra el canvas
 
@@ -46,7 +46,6 @@ canvas.addEventListener('mousemove', (event) => {
     socket.emit('paddleMove', { y: localPaddleY });
 });
 
-// Funciones de dibujo
 function drawBall(ball) {
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, 8, 0, Math.PI * 2);
