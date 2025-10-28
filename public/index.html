@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong con Sockets</title>
+    <style>
+        body { background-color: #333; color: white; font-family: monospace; text-align: center; }
+        canvas { background: black; border: 2px solid white; }
+    </style>
+</head>
+<body>
+    <h1>Pong en Tiempo Real</h1>
+    <p>Mueve tu paleta con el ratón. Esperando al segundo jugador...</p>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <p>Jugador <span id="player-number">?</span></p>
+    <p>Puntuación: <span id="score-1">0</span> - <span id="score-2">0</span></p>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
