@@ -1,7 +1,7 @@
-// Conectar al servidor
+//* Conectar al servidor
 const socket = io();
 
-// Elementos del DOM
+//* Elementos del DOM
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const playerNumberDisplay = document.getElementById('player-number');
@@ -12,16 +12,17 @@ let myPlayerNumber;
 let localPaddleY;
 const paddleHeight = 80;
 
-// Recibir el número de jugador asignado por el servidor
+//* Recibir el número de jugador asignado por el servidor
 socket.on('playerNumber', (num) => {
     myPlayerNumber = num;
     playerNumberDisplay.textContent = myPlayerNumber;
     console.log(`Eres el jugador: ${myPlayerNumber}`);
 });
 
-// Recibir el estado del juego desde el servidor 
+//* Recibir el estado del juego desde el servidor 
 socket.on('gameState', (gameState) => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Borra el canvas
+    // Borra el canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
 
     // Dibuja la pelota
     drawBall(gameState.ball);
@@ -35,7 +36,7 @@ socket.on('gameState', (gameState) => {
     score2Display.textContent = gameState.score.player2;
 });
 
-// Evento para mover la paleta con el ratón
+//* Evento para mover la paleta con el ratón
 canvas.addEventListener('mousemove', (event) => {
     // Calcula la nueva posición y la limita al canvas
     localPaddleY = event.offsetY - paddleHeight / 2;
@@ -46,6 +47,7 @@ canvas.addEventListener('mousemove', (event) => {
     socket.emit('paddleMove', { y: localPaddleY });
 });
 
+//* Funciones de dibujo
 function drawBall(ball) {
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, 8, 0, Math.PI * 2);
