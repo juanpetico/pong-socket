@@ -47,46 +47,52 @@ function gameLoop() {
   gameState.ball.x += gameState.ball.dx;
   gameState.ball.y += gameState.ball.dy;
 
-  // Colisiones con paredes
-  if (
-    gameState.ball.y + gameState.ball.dy > canvasHeight - ballRadius ||
-    gameState.ball.y + gameState.ball.dy < ballRadius
-  ) {
-    gameState.ball.dy = -gameState.ball.dy;
+  // Colisiones con paredes (top/bottom) — usar posición actual y fijar
+  if (gameState.ball.y <= ballRadius) {
+    gameState.ball.y = ballRadius;
+    gameState.ball.dy = Math.abs(gameState.ball.dy);
+  } else if (gameState.ball.y >= canvasHeight - ballRadius) {
+    gameState.ball.y = canvasHeight - ballRadius;
+    gameState.ball.dy = -Math.abs(gameState.ball.dy);
   }
 
-  // Colisiones con paletas
+  // Colisión con paleta del jugador 1 (izquierda)
   if (
+    gameState.ball.dx < 0 &&
     gameState.ball.x - ballRadius <= gameState.player1.x + paddleWidth &&
-    gameState.ball.y > gameState.player1.y &&
-    gameState.ball.y < gameState.player1.y + paddleHeight
+    gameState.ball.x + ballRadius >= gameState.player1.x &&
+    gameState.ball.y + ballRadius >= gameState.player1.y &&
+    gameState.ball.y - ballRadius <= gameState.player1.y + paddleHeight
   ) {
-    let newDx = -gameState.ball.dx;
-
-    if (Math.abs(newDx) < MAX_SPEED) {
-      newDx += (newDx > 0 ? SPEED_INCREMENT : -SPEED_INCREMENT); 
+    gameState.ball.x = gameState.player1.x + paddleWidth + ballRadius;
+    let newSpeed = Math.abs(gameState.ball.dx);
+    if (newSpeed < MAX_SPEED) {
+      newSpeed = Math.min(newSpeed + SPEED_INCREMENT, MAX_SPEED);
     }
-    gameState.ball.dx = newDx;
+    gameState.ball.dx = newSpeed;
   }
 
+  // Colisión con paleta del jugador 2 (derecha)
   if (
+    gameState.ball.dx > 0 &&
     gameState.ball.x + ballRadius >= gameState.player2.x &&
-    gameState.ball.y > gameState.player2.y &&
-    gameState.ball.y < gameState.player2.y + paddleHeight
+    gameState.ball.x - ballRadius <= gameState.player2.x + paddleWidth &&
+    gameState.ball.y + ballRadius >= gameState.player2.y &&
+    gameState.ball.y - ballRadius <= gameState.player2.y + paddleHeight
   ) {
-    let newDx = -gameState.ball.dx;
-
-    if (Math.abs(newDx) < MAX_SPEED) {
-      newDx += (newDx > 0 ? SPEED_INCREMENT : -SPEED_INCREMENT); 
+    gameState.ball.x = gameState.player2.x - ballRadius;
+    let newSpeed = Math.abs(gameState.ball.dx);
+    if (newSpeed < MAX_SPEED) {
+      newSpeed = Math.min(newSpeed + SPEED_INCREMENT, MAX_SPEED);
     }
-    gameState.ball.dx = newDx;
+    gameState.ball.dx = -newSpeed;
   }
 
-  // Puntuación
-  if (gameState.ball.x < 0) {
+  // Puntuación — la pelota debe salir completamente del campo
+  if (gameState.ball.x + ballRadius < 0) {
     gameState.score.player2++;
     resetBall();
-  } else if (gameState.ball.x > canvasWidth) {
+  } else if (gameState.ball.x - ballRadius > canvasWidth) {
     gameState.score.player1++;
     resetBall();
   }
@@ -117,12 +123,16 @@ function handleConnection(socket) {
     delete players[socket.id];
   });
 
-  // Movimiento de paleta
+  // Movimiento de paleta — validar y fijar posición en el servidor
   socket.on("paddleMove", (data) => {
+    const y = Number(data.y);
+    if (!Number.isFinite(y)) return;
+    const clampedY = Math.max(0, Math.min(canvasHeight - paddleHeight, y));
+
     if (players[socket.id] === 1) {
-      gameState.player1.y = data.y;
+      gameState.player1.y = clampedY;
     } else if (players[socket.id] === 2) {
-      gameState.player2.y = data.y;
+      gameState.player2.y = clampedY;
     }
   });
 }
